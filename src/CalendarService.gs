@@ -5,19 +5,27 @@
  */
 
 /**
- * Fetches all calendar events within a date range from the user's primary calendar.
+ * Fetches all calendar events within a date range from ALL user calendars.
  * @param {Date} startDate - The start of the date range
  * @param {Date} endDate - The end of the date range
  * @returns {GoogleAppsScript.Calendar.CalendarEvent[]} Array of calendar events
  */
 function fetchCalendarEvents(startDate, endDate) {
   try {
-    const calendar = CalendarApp.getDefaultCalendar();
-    const events = calendar.getEvents(startDate, endDate);
+    const allEvents = [];
+    const calendars = CalendarApp.getAllCalendars();
 
-    Logger.log(`Fetched ${events.length} events from calendar "${calendar.getName()}"`);
+    Logger.log(`Found ${calendars.length} calendars`);
 
-    return events;
+    calendars.forEach(calendar => {
+      const events = calendar.getEvents(startDate, endDate);
+      Logger.log(`Fetched ${events.length} events from calendar "${calendar.getName()}"`);
+      allEvents.push(...events);
+    });
+
+    Logger.log(`Total events from all calendars: ${allEvents.length}`);
+
+    return allEvents;
   } catch (error) {
     Logger.log('Error fetching calendar events: ' + error.message);
     throw new Error('Failed to fetch calendar events. Please check calendar permissions.');
