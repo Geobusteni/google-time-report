@@ -5,26 +5,38 @@
  */
 
 /**
- * Fetches all calendar events within a date range from user's owned calendars.
+ * Gets list of all user's calendars for the sidebar.
+ * @returns {Object[]} Array of calendar objects with id and name
+ */
+function getCalendarList() {
+  const calendars = CalendarApp.getAllOwnedCalendars();
+  return calendars.map(cal => ({
+    id: cal.getId(),
+    name: cal.getName()
+  }));
+}
+
+/**
+ * Fetches calendar events from specific calendars within a date range.
  * @param {Date} startDate - The start of the date range
  * @param {Date} endDate - The end of the date range
+ * @param {string[]} calendarIds - Array of calendar IDs to fetch from
  * @returns {GoogleAppsScript.Calendar.CalendarEvent[]} Array of calendar events
  */
-function fetchCalendarEvents(startDate, endDate) {
+function fetchCalendarEvents(startDate, endDate, calendarIds) {
   try {
     const allEvents = [];
 
-    // Get calendars the user owns (primary + created calendars)
-    const ownedCalendars = CalendarApp.getAllOwnedCalendars();
-    Logger.log(`Found ${ownedCalendars.length} owned calendars`);
-
-    ownedCalendars.forEach(calendar => {
+    calendarIds.forEach(calId => {
       try {
-        const events = calendar.getEvents(startDate, endDate);
-        Logger.log(`Fetched ${events.length} events from "${calendar.getName()}"`);
-        allEvents.push(...events);
+        const calendar = CalendarApp.getCalendarById(calId);
+        if (calendar) {
+          const events = calendar.getEvents(startDate, endDate);
+          Logger.log(`Fetched ${events.length} events from "${calendar.getName()}"`);
+          allEvents.push(...events);
+        }
       } catch (e) {
-        Logger.log(`Could not read calendar "${calendar.getName()}": ${e.message}`);
+        Logger.log(`Could not read calendar ${calId}: ${e.message}`);
       }
     });
 

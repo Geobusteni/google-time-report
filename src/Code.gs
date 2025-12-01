@@ -375,11 +375,13 @@ function formatDateForInput(date) {
  * Generates report for a custom date range (called from sidebar).
  * @param {string} startDateStr - Start date as YYYY-MM-DD
  * @param {string} endDateStr - End date as YYYY-MM-DD
+ * @param {string[]} calendarIds - Array of calendar IDs to include
  * @returns {Object} Result object
  */
-function generateReportForDateRange(startDateStr, endDateStr) {
+function generateReportForDateRange(startDateStr, endDateStr, calendarIds) {
   try {
     Logger.log(`Starting report generation for ${startDateStr} to ${endDateStr}`);
+    Logger.log(`Selected ${calendarIds.length} calendars`);
 
     // Parse date strings
     const startDate = parseInputDate(startDateStr);
@@ -388,10 +390,17 @@ function generateReportForDateRange(startDateStr, endDateStr) {
     // Set end date to end of day
     endDate.setHours(23, 59, 59, 999);
 
+    // Cap end date to now if it's in the future
+    const now = new Date();
+    if (endDate > now) {
+      endDate.setTime(now.getTime());
+      Logger.log(`End date capped to now: ${endDate.toISOString()}`);
+    }
+
     Logger.log(`Date range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
 
     // Fetch and filter calendar events
-    const events = fetchCalendarEvents(startDate, endDate);
+    const events = fetchCalendarEvents(startDate, endDate, calendarIds);
     Logger.log(`Found ${events.length} total events`);
 
     const filteredEvents = filterProjectEvents(events);
@@ -418,13 +427,18 @@ function generateReportForDateRange(startDateStr, endDateStr) {
     const spreadsheet = createDateRangeSpreadsheet(startDateStr, endDateStr);
     writeReportToSheet(spreadsheet, reportData, totalsData);
 
+    // Force write to complete
+    SpreadsheetApp.flush();
+
+    const url = spreadsheet.getUrl();
     const message = `Report generated successfully! ${reportData.length} events processed for ${startDateStr} to ${endDateStr}.`;
     Logger.log(message);
+    Logger.log(`Spreadsheet URL: ${url}`);
 
     return {
       success: true,
       message: message,
-      spreadsheetUrl: spreadsheet.getUrl(),
+      spreadsheetUrl: url,
       eventCount: reportData.length
     };
 

@@ -3,11 +3,7 @@
 <head>
   <base target="_top">
   <style>
-    /* Google-style CSS */
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       font-family: 'Google Sans', Roboto, Arial, sans-serif;
       font-size: 14px;
@@ -16,40 +12,11 @@
       padding: 16px;
       background-color: #fff;
     }
-
-    h1 {
-      font-size: 18px;
-      font-weight: 500;
-      color: #202124;
-      margin: 0 0 16px 0;
-    }
-
-    h2 {
-      font-size: 14px;
-      font-weight: 500;
-      color: #5f6368;
-      margin: 20px 0 12px 0;
-    }
-
-    .description {
-      font-size: 13px;
-      color: #5f6368;
-      margin-bottom: 20px;
-      line-height: 1.5;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    label {
-      display: block;
-      font-size: 12px;
-      font-weight: 500;
-      color: #5f6368;
-      margin-bottom: 6px;
-    }
-
+    h1 { font-size: 18px; font-weight: 500; margin: 0 0 16px 0; }
+    h2 { font-size: 14px; font-weight: 500; color: #5f6368; margin: 20px 0 12px 0; }
+    .description { font-size: 13px; color: #5f6368; margin-bottom: 20px; line-height: 1.5; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 12px; font-weight: 500; color: #5f6368; margin-bottom: 6px; }
     select, input[type="date"] {
       width: 100%;
       padding: 10px 12px;
@@ -58,22 +25,12 @@
       border-radius: 4px;
       background-color: #fff;
       color: #202124;
-      cursor: pointer;
     }
-
-    select {
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235f6368' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-    }
-
     select:focus, input[type="date"]:focus {
       outline: none;
       border-color: #1a73e8;
       box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
     }
-
     .button-primary {
       width: 100%;
       padding: 12px 24px;
@@ -84,108 +41,33 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      transition: background-color 0.2s, box-shadow 0.2s;
     }
-
-    .button-primary:hover {
-      background-color: #1557b0;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    }
-
-    .button-primary:disabled {
-      background-color: #dadce0;
-      color: #80868b;
-      cursor: not-allowed;
-    }
-
-    .status-container {
-      margin-top: 20px;
-      padding: 12px;
-      border-radius: 4px;
-      display: none;
-    }
-
-    .status-container.visible {
-      display: block;
-    }
-
-    .status-container.loading {
-      background-color: #e8f0fe;
-      border: 1px solid #1a73e8;
-    }
-
-    .status-container.success {
-      background-color: #e6f4ea;
-      border: 1px solid #34a853;
-    }
-
-    .status-container.error {
-      background-color: #fce8e6;
-      border: 1px solid #ea4335;
-    }
-
-    .status-message {
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .status-container.loading .status-message {
-      color: #1a73e8;
-    }
-
-    .status-container.success .status-message {
-      color: #137333;
-    }
-
-    .status-container.error .status-message {
-      color: #c5221f;
-    }
-
+    .button-primary:hover { background-color: #1557b0; }
+    .button-primary:disabled { background-color: #dadce0; color: #80868b; cursor: not-allowed; }
+    .status-container { margin-top: 20px; padding: 12px; border-radius: 4px; display: none; }
+    .status-container.visible { display: block; }
+    .status-container.loading { background-color: #e8f0fe; border: 1px solid #1a73e8; }
+    .status-container.success { background-color: #e6f4ea; border: 1px solid #34a853; }
+    .status-container.error { background-color: #fce8e6; border: 1px solid #ea4335; }
+    .status-message { font-size: 13px; line-height: 1.5; }
+    .status-container.loading .status-message { color: #1a73e8; }
+    .status-container.success .status-message { color: #137333; }
+    .status-container.error .status-message { color: #c5221f; }
     .spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid #1a73e8;
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-right: 8px;
-      vertical-align: middle;
+      display: inline-block; width: 16px; height: 16px;
+      border: 2px solid #1a73e8; border-top-color: transparent;
+      border-radius: 50%; animation: spin 1s linear infinite;
+      margin-right: 8px; vertical-align: middle;
     }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .link {
-      color: #1a73e8;
-      text-decoration: none;
-    }
-
-    .link:hover {
-      text-decoration: underline;
-    }
-
-    .divider {
-      height: 1px;
-      background-color: #dadce0;
-      margin: 24px 0;
-    }
-
-    .row {
-      display: flex;
-      gap: 12px;
-    }
-
-    .row .form-group {
-      flex: 1;
-    }
-
-    .help-text {
-      font-size: 12px;
-      color: #80868b;
-      margin-top: 8px;
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .link { color: #1a73e8; text-decoration: none; }
+    .link:hover { text-decoration: underline; }
+    .divider { height: 1px; background-color: #dadce0; margin: 24px 0; }
+    .help-text { font-size: 12px; color: #80868b; margin-top: 8px; }
+    .checkbox-group { display: flex; flex-direction: column; gap: 8px; max-height: 150px; overflow-y: auto; padding: 8px; border: 1px solid #dadce0; border-radius: 4px; }
+    .checkbox-item { display: flex; align-items: center; gap: 8px; }
+    .checkbox-item input { margin: 0; }
+    .checkbox-item label { margin: 0; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -193,8 +75,13 @@
 
   <p class="description">
     Generate time reports from calendar events that start with project codes
-    (e.g., <strong>#193IQTIG</strong> Meeting).
+    (e.g., <strong>#93IQTIG</strong> - Meeting).
   </p>
+
+  <h2>Select Calendars</h2>
+  <div id="calendarList" class="checkbox-group">
+    <div>Loading calendars...</div>
+  </div>
 
   <h2>Select Date Range</h2>
 
@@ -219,30 +106,69 @@
   <div class="divider"></div>
 
   <p class="help-text">
-    Events must have titles starting with <strong>#</strong> followed by a project code
-    (e.g., "#ABC123 Team Meeting"). All-day events are ignored.
+    Events must have titles starting with <strong>#</strong> followed by a project code.
+    All-day events are ignored.
   </p>
 
   <script>
-    // Initialize the form when the sidebar loads
     document.addEventListener('DOMContentLoaded', initialize);
 
     function initialize() {
-      // Set default dates to current month
+      // Load calendars
+      google.script.run
+        .withSuccessHandler(populateCalendars)
+        .withFailureHandler(handleError)
+        .getCalendarList();
+
+      // Set default dates
       google.script.run
         .withSuccessHandler(setDefaultDates)
         .withFailureHandler(handleError)
         .getDefaultDateRange();
     }
 
+    function populateCalendars(calendars) {
+      const container = document.getElementById('calendarList');
+      container.innerHTML = '';
+
+      calendars.forEach(function(cal, index) {
+        const item = document.createElement('div');
+        item.className = 'checkbox-item';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = 'cal_' + index;
+        checkbox.value = cal.id;
+        checkbox.checked = true; // Select all by default
+
+        const label = document.createElement('label');
+        label.htmlFor = 'cal_' + index;
+        label.textContent = cal.name;
+
+        item.appendChild(checkbox);
+        item.appendChild(label);
+        container.appendChild(item);
+      });
+    }
+
     function setDefaultDates(data) {
       document.getElementById('startDate').value = data.startDate;
       document.getElementById('endDate').value = data.endDate;
+
+      // Set max date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('endDate').max = today;
+    }
+
+    function getSelectedCalendarIds() {
+      const checkboxes = document.querySelectorAll('#calendarList input[type="checkbox"]:checked');
+      return Array.from(checkboxes).map(cb => cb.value);
     }
 
     function generateReport() {
       const startDate = document.getElementById('startDate').value;
       const endDate = document.getElementById('endDate').value;
+      const calendarIds = getSelectedCalendarIds();
 
       if (!startDate || !endDate) {
         showError('Please select both start and end dates.');
@@ -254,13 +180,18 @@
         return;
       }
 
+      if (calendarIds.length === 0) {
+        showError('Please select at least one calendar.');
+        return;
+      }
+
       showLoading('Generating report...');
       disableButton(true);
 
       google.script.run
         .withSuccessHandler(handleSuccess)
         .withFailureHandler(handleError)
-        .generateReportForDateRange(startDate, endDate);
+        .generateReportForDateRange(startDate, endDate, calendarIds);
     }
 
     function handleSuccess(result) {
@@ -268,12 +199,9 @@
 
       if (result.success) {
         let message = result.message;
-
         if (result.spreadsheetUrl) {
-          message += '<br><br><a href="' + result.spreadsheetUrl +
-                     '" target="_blank" class="link">Open Report</a>';
+          message += '<br><br><a href="' + result.spreadsheetUrl + '" target="_blank" class="link">Open Report</a>';
         }
-
         showSuccess(message);
       } else {
         showError(result.message);
@@ -288,7 +216,6 @@
     function showLoading(message) {
       const container = document.getElementById('statusContainer');
       const messageEl = document.getElementById('statusMessage');
-
       container.className = 'status-container visible loading';
       messageEl.innerHTML = '<span class="spinner"></span>' + message;
     }
@@ -296,7 +223,6 @@
     function showSuccess(message) {
       const container = document.getElementById('statusContainer');
       const messageEl = document.getElementById('statusMessage');
-
       container.className = 'status-container visible success';
       messageEl.innerHTML = message;
     }
@@ -304,7 +230,6 @@
     function showError(message) {
       const container = document.getElementById('statusContainer');
       const messageEl = document.getElementById('statusMessage');
-
       container.className = 'status-container visible error';
       messageEl.innerHTML = message;
     }
