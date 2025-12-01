@@ -6,7 +6,7 @@
 
 /**
  * Gets or creates a monthly spreadsheet for the specified month.
- * Creates a new spreadsheet if one doesn't exist for the month.
+ * Always creates a new spreadsheet (simpler, no Drive search needed).
  * @param {number} year - The year
  * @param {number} month - The month (0-11)
  * @returns {GoogleAppsScript.Spreadsheet.Spreadsheet} The spreadsheet
@@ -14,17 +14,8 @@
 function getOrCreateMonthlySpreadsheet(year, month) {
   const spreadsheetName = generateSpreadsheetName(year, month);
 
-  // Try to find existing spreadsheet with this name
-  const files = DriveApp.getFilesByName(spreadsheetName);
-
-  if (files.hasNext()) {
-    const file = files.next();
-    Logger.log(`Found existing spreadsheet: ${spreadsheetName}`);
-    return SpreadsheetApp.openById(file.getId());
-  }
-
   // Create new spreadsheet
-  Logger.log(`Creating new spreadsheet: ${spreadsheetName}`);
+  Logger.log(`Creating spreadsheet: ${spreadsheetName}`);
   const spreadsheet = SpreadsheetApp.create(spreadsheetName);
 
   return spreadsheet;

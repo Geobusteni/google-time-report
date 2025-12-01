@@ -340,26 +340,131 @@ function generateMonthlyReportTrigger() {
 // ============================================================================
 
 /**
- * Gets the current year and month for the sidebar UI.
- * @returns {Object} Object with current year and month
+ * Gets the default date range for the sidebar (current month).
+ * @returns {Object} Object with startDate and endDate as YYYY-MM-DD strings
  */
-function getCurrentYearMonth() {
+function getDefaultDateRange() {
   const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+
+  // First day of current month
+  const firstDay = new Date(year, month, 1);
+  // Last day of current month
+  const lastDay = new Date(year, month + 1, 0);
+
   return {
-    year: now.getFullYear(),
-    month: now.getMonth() + 1 // 1-indexed for UI
+    startDate: formatDateForInput(firstDay),
+    endDate: formatDateForInput(lastDay)
   };
 }
 
 /**
- * Gets a list of available years for the dropdown.
- * @returns {number[]} Array of years
+ * Formats a date as YYYY-MM-DD for HTML date input.
+ * @param {Date} date - The date to format
+ * @returns {string} Formatted date string
  */
-function getAvailableYears() {
-  const currentYear = new Date().getFullYear();
-  const years = [];
-  for (let i = currentYear - 2; i <= currentYear + 1; i++) {
-    years.push(i);
+function formatDateForInput(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Generates report for a custom date range (called from sidebar).
+ * @param {string} startDateStr - Start date as YYYY-MM-DD
+ * @param {string} endDateStr - End date as YYYY-MM-DD
+ * @returns {Object} Result object
+ */
+function generateReportForDateRange(startDateStr, endDateStr) {
+  try {
+    Logger.log(`Starting report generation for ${startDateStr} to ${endDateStr}`);
+
+    // Parse date strings
+    const startDate = parseInputDate(startDateStr);
+    const endDate = parseInputDate(endDateStr);
+
+    // Set end date to end of day
+    endDate.setHours(23, 59, 59, 999);
+
+    Logger.log(`Date range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
+
+    // Fetch and filter calendar events
+    const events = fetchCalendarEvents(startDate, endDate);
+    Logger.log(`Found ${events.length} total events`);
+
+    const filteredEvents = filterProjectEvents(events);
+    Logger.log(`Found ${filteredEvents.length} project events (starting with #)`);
+
+    if (filteredEvents.length === 0) {
+      return {
+        success: true,
+        message: `No project events found for ${startDateStr} to ${endDateStr}. Events must start with # followed by a project code.`,
+        spreadsheetUrl: null,
+        eventCount: 0
+      };
+    }
+
+    // Process events into report data
+    const reportData = processEventsToReportData(filteredEvents);
+    Logger.log(`Processed ${reportData.length} report rows`);
+
+    // Calculate totals
+    const totalsData = calculateTotals(reportData);
+    Logger.log(`Calculated totals for ${totalsData.length - 1} projects`);
+
+    // Create spreadsheet with date range in name
+    const spreadsheet = createDateRangeSpreadsheet(startDateStr, endDateStr);
+    writeReportToSheet(spreadsheet, reportData, totalsData);
+
+    const message = `Report generated successfully! ${reportData.length} events processed for ${startDateStr} to ${endDateStr}.`;
+    Logger.log(message);
+
+    return {
+      success: true,
+      message: message,
+      spreadsheetUrl: spreadsheet.getUrl(),
+      eventCount: reportData.length
+    };
+
+  } catch (error) {
+    const errorMessage = `Error generating report: ${error.message}`;
+    Logger.log(errorMessage);
+    console.error(error);
+
+    return {
+      success: false,
+      message: errorMessage,
+      spreadsheetUrl: null,
+      eventCount: 0
+    };
   }
-  return years;
+}
+
+/**
+ * Parses a YYYY-MM-DD date string into a Date object.
+ * @param {string} dateStr - Date string in YYYY-MM-DD format
+ * @returns {Date} Parsed date
+ */
+function parseInputDate(dateStr) {
+  const parts = dateStr.split('-');
+  return new Date(
+    parseInt(parts[0]),
+    parseInt(parts[1]) - 1,
+    parseInt(parts[2]),
+    0, 0, 0, 0
+  );
+}
+
+/**
+ * Creates a spreadsheet for a custom date range.
+ * @param {string} startDateStr - Start date as YYYY-MM-DD
+ * @param {string} endDateStr - End date as YYYY-MM-DD
+ * @returns {GoogleAppsScript.Spreadsheet.Spreadsheet} The spreadsheet
+ */
+function createDateRangeSpreadsheet(startDateStr, endDateStr) {
+  const spreadsheetName = `${SPREADSHEET_NAME_PREFIX} – ${startDateStr} to ${endDateStr}`;
+  Logger.log(`Creating spreadsheet: ${spreadsheetName}`);
+  return SpreadsheetApp.create(spreadsheetName);
 }

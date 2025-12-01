@@ -50,7 +50,7 @@
       margin-bottom: 6px;
     }
 
-    select {
+    select, input[type="date"] {
       width: 100%;
       padding: 10px 12px;
       font-size: 14px;
@@ -59,13 +59,16 @@
       background-color: #fff;
       color: #202124;
       cursor: pointer;
+    }
+
+    select {
       appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235f6368' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 12px center;
     }
 
-    select:focus {
+    select:focus, input[type="date"]:focus {
       outline: none;
       border-color: #1a73e8;
       box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
@@ -93,24 +96,6 @@
       background-color: #dadce0;
       color: #80868b;
       cursor: not-allowed;
-    }
-
-    .button-secondary {
-      width: 100%;
-      padding: 10px 24px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #1a73e8;
-      background-color: #fff;
-      border: 1px solid #dadce0;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-      margin-top: 8px;
-    }
-
-    .button-secondary:hover {
-      background-color: #f8f9fa;
     }
 
     .status-container {
@@ -211,39 +196,20 @@
     (e.g., <strong>#193IQTIG</strong> Meeting).
   </p>
 
-  <h2>Select Month</h2>
+  <h2>Select Date Range</h2>
 
-  <div class="row">
-    <div class="form-group">
-      <label for="year">Year</label>
-      <select id="year"></select>
-    </div>
+  <div class="form-group">
+    <label for="startDate">Start Date</label>
+    <input type="date" id="startDate">
+  </div>
 
-    <div class="form-group">
-      <label for="month">Month</label>
-      <select id="month">
-        <option value="1">January</option>
-        <option value="2">February</option>
-        <option value="3">March</option>
-        <option value="4">April</option>
-        <option value="5">May</option>
-        <option value="6">June</option>
-        <option value="7">July</option>
-        <option value="8">August</option>
-        <option value="9">September</option>
-        <option value="10">October</option>
-        <option value="11">November</option>
-        <option value="12">December</option>
-      </select>
-    </div>
+  <div class="form-group">
+    <label for="endDate">End Date</label>
+    <input type="date" id="endDate">
   </div>
 
   <button id="generateBtn" class="button-primary" onclick="generateReport()">
     Generate Time Report
-  </button>
-
-  <button class="button-secondary" onclick="generateCurrentMonth()">
-    Quick: Current Month
   </button>
 
   <div id="statusContainer" class="status-container">
@@ -262,39 +228,31 @@
     document.addEventListener('DOMContentLoaded', initialize);
 
     function initialize() {
-      // Populate year dropdown
+      // Set default dates to current month
       google.script.run
-        .withSuccessHandler(populateYears)
+        .withSuccessHandler(setDefaultDates)
         .withFailureHandler(handleError)
-        .getAvailableYears();
-
-      // Set current month as default
-      google.script.run
-        .withSuccessHandler(setCurrentMonth)
-        .withFailureHandler(handleError)
-        .getCurrentYearMonth();
+        .getDefaultDateRange();
     }
 
-    function populateYears(years) {
-      const yearSelect = document.getElementById('year');
-      yearSelect.innerHTML = '';
-
-      years.forEach(function(year) {
-        const option = document.createElement('option');
-        option.value = year;
-        option.textContent = year;
-        yearSelect.appendChild(option);
-      });
-    }
-
-    function setCurrentMonth(data) {
-      document.getElementById('year').value = data.year;
-      document.getElementById('month').value = data.month;
+    function setDefaultDates(data) {
+      document.getElementById('startDate').value = data.startDate;
+      document.getElementById('endDate').value = data.endDate;
     }
 
     function generateReport() {
-      const year = document.getElementById('year').value;
-      const month = document.getElementById('month').value;
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+
+      if (!startDate || !endDate) {
+        showError('Please select both start and end dates.');
+        return;
+      }
+
+      if (startDate > endDate) {
+        showError('Start date must be before end date.');
+        return;
+      }
 
       showLoading('Generating report...');
       disableButton(true);
@@ -302,17 +260,7 @@
       google.script.run
         .withSuccessHandler(handleSuccess)
         .withFailureHandler(handleError)
-        .generateReportFromSidebar(year, month);
-    }
-
-    function generateCurrentMonth() {
-      showLoading('Generating current month report...');
-      disableButton(true);
-
-      google.script.run
-        .withSuccessHandler(handleSuccess)
-        .withFailureHandler(handleError)
-        .generateCurrentMonthReport();
+        .generateReportForDateRange(startDate, endDate);
     }
 
     function handleSuccess(result) {

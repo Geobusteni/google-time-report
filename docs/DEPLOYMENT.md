@@ -77,7 +77,6 @@ Delete any existing code in the default `Code.gs` file, then:
     "https://www.googleapis.com/auth/calendar.readonly",
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/script.container.ui",
-    "https://www.googleapis.com/auth/drive.file",
     "https://www.googleapis.com/auth/script.scriptapp"
   ]
 }
