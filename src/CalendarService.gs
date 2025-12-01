@@ -5,7 +5,7 @@
  */
 
 /**
- * Fetches all calendar events within a date range from ALL user calendars.
+ * Fetches all calendar events within a date range from user's owned calendars.
  * @param {Date} startDate - The start of the date range
  * @param {Date} endDate - The end of the date range
  * @returns {GoogleAppsScript.Calendar.CalendarEvent[]} Array of calendar events
@@ -13,17 +13,22 @@
 function fetchCalendarEvents(startDate, endDate) {
   try {
     const allEvents = [];
-    const calendars = CalendarApp.getAllCalendars();
 
-    Logger.log(`Found ${calendars.length} calendars`);
+    // Get calendars the user owns (primary + created calendars)
+    const ownedCalendars = CalendarApp.getAllOwnedCalendars();
+    Logger.log(`Found ${ownedCalendars.length} owned calendars`);
 
-    calendars.forEach(calendar => {
-      const events = calendar.getEvents(startDate, endDate);
-      Logger.log(`Fetched ${events.length} events from calendar "${calendar.getName()}"`);
-      allEvents.push(...events);
+    ownedCalendars.forEach(calendar => {
+      try {
+        const events = calendar.getEvents(startDate, endDate);
+        Logger.log(`Fetched ${events.length} events from "${calendar.getName()}"`);
+        allEvents.push(...events);
+      } catch (e) {
+        Logger.log(`Could not read calendar "${calendar.getName()}": ${e.message}`);
+      }
     });
 
-    Logger.log(`Total events from all calendars: ${allEvents.length}`);
+    Logger.log(`Total events: ${allEvents.length}`);
 
     return allEvents;
   } catch (error) {
