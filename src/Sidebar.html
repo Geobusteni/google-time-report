@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    /* Google-style CSS */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Google Sans', Roboto, Arial, sans-serif;
+      font-size: 14px;
+      color: #202124;
+      margin: 0;
+      padding: 16px;
+      background-color: #fff;
+    }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 500;
+      color: #202124;
+      margin: 0 0 16px 0;
+    }
+
+    h2 {
+      font-size: 14px;
+      font-weight: 500;
+      color: #5f6368;
+      margin: 20px 0 12px 0;
+    }
+
+    .description {
+      font-size: 13px;
+      color: #5f6368;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: #5f6368;
+      margin-bottom: 6px;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      background-color: #fff;
+      color: #202124;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235f6368' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+    }
+
+    .button-primary {
+      width: 100%;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #fff;
+      background-color: #1a73e8;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s, box-shadow 0.2s;
+    }
+
+    .button-primary:hover {
+      background-color: #1557b0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .button-primary:disabled {
+      background-color: #dadce0;
+      color: #80868b;
+      cursor: not-allowed;
+    }
+
+    .button-secondary {
+      width: 100%;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a73e8;
+      background-color: #fff;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-top: 8px;
+    }
+
+    .button-secondary:hover {
+      background-color: #f8f9fa;
+    }
+
+    .status-container {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 4px;
+      display: none;
+    }
+
+    .status-container.visible {
+      display: block;
+    }
+
+    .status-container.loading {
+      background-color: #e8f0fe;
+      border: 1px solid #1a73e8;
+    }
+
+    .status-container.success {
+      background-color: #e6f4ea;
+      border: 1px solid #34a853;
+    }
+
+    .status-container.error {
+      background-color: #fce8e6;
+      border: 1px solid #ea4335;
+    }
+
+    .status-message {
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .status-container.loading .status-message {
+      color: #1a73e8;
+    }
+
+    .status-container.success .status-message {
+      color: #137333;
+    }
+
+    .status-container.error .status-message {
+      color: #c5221f;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #1a73e8;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .link {
+      color: #1a73e8;
+      text-decoration: none;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
+
+    .divider {
+      height: 1px;
+      background-color: #dadce0;
+      margin: 24px 0;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .row .form-group {
+      flex: 1;
+    }
+
+    .help-text {
+      font-size: 12px;
+      color: #80868b;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Time Report Generator</h1>
+
+  <p class="description">
+    Generate time reports from calendar events that start with project codes
+    (e.g., <strong>#193IQTIG</strong> Meeting).
+  </p>
+
+  <h2>Select Month</h2>
+
+  <div class="row">
+    <div class="form-group">
+      <label for="year">Year</label>
+      <select id="year"></select>
+    </div>
+
+    <div class="form-group">
+      <label for="month">Month</label>
+      <select id="month">
+        <option value="1">January</option>
+        <option value="2">February</option>
+        <option value="3">March</option>
+        <option value="4">April</option>
+        <option value="5">May</option>
+        <option value="6">June</option>
+        <option value="7">July</option>
+        <option value="8">August</option>
+        <option value="9">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+      </select>
+    </div>
+  </div>
+
+  <button id="generateBtn" class="button-primary" onclick="generateReport()">
+    Generate Time Report
+  </button>
+
+  <button class="button-secondary" onclick="generateCurrentMonth()">
+    Quick: Current Month
+  </button>
+
+  <div id="statusContainer" class="status-container">
+    <div id="statusMessage" class="status-message"></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <p class="help-text">
+    Events must have titles starting with <strong>#</strong> followed by a project code
+    (e.g., "#ABC123 Team Meeting"). All-day events are ignored.
+  </p>
+
+  <script>
+    // Initialize the form when the sidebar loads
+    document.addEventListener('DOMContentLoaded', initialize);
+
+    function initialize() {
+      // Populate year dropdown
+      google.script.run
+        .withSuccessHandler(populateYears)
+        .withFailureHandler(handleError)
+        .getAvailableYears();
+
+      // Set current month as default
+      google.script.run
+        .withSuccessHandler(setCurrentMonth)
+        .withFailureHandler(handleError)
+        .getCurrentYearMonth();
+    }
+
+    function populateYears(years) {
+      const yearSelect = document.getElementById('year');
+      yearSelect.innerHTML = '';
+
+      years.forEach(function(year) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
+      });
+    }
+
+    function setCurrentMonth(data) {
+      document.getElementById('year').value = data.year;
+      document.getElementById('month').value = data.month;
+    }
+
+    function generateReport() {
+      const year = document.getElementById('year').value;
+      const month = document.getElementById('month').value;
+
+      showLoading('Generating report...');
+      disableButton(true);
+
+      google.script.run
+        .withSuccessHandler(handleSuccess)
+        .withFailureHandler(handleError)
+        .generateReportFromSidebar(year, month);
+    }
+
+    function generateCurrentMonth() {
+      showLoading('Generating current month report...');
+      disableButton(true);
+
+      google.script.run
+        .withSuccessHandler(handleSuccess)
+        .withFailureHandler(handleError)
+        .generateCurrentMonthReport();
+    }
+
+    function handleSuccess(result) {
+      disableButton(false);
+
+      if (result.success) {
+        let message = result.message;
+
+        if (result.spreadsheetUrl) {
+          message += '<br><br><a href="' + result.spreadsheetUrl +
+                     '" target="_blank" class="link">Open Report</a>';
+        }
+
+        showSuccess(message);
+      } else {
+        showError(result.message);
+      }
+    }
+
+    function handleError(error) {
+      disableButton(false);
+      showError('Error: ' + (error.message || error));
+    }
+
+    function showLoading(message) {
+      const container = document.getElementById('statusContainer');
+      const messageEl = document.getElementById('statusMessage');
+
+      container.className = 'status-container visible loading';
+      messageEl.innerHTML = '<span class="spinner"></span>' + message;
+    }
+
+    function showSuccess(message) {
+      const container = document.getElementById('statusContainer');
+      const messageEl = document.getElementById('statusMessage');
+
+      container.className = 'status-container visible success';
+      messageEl.innerHTML = message;
+    }
+
+    function showError(message) {
+      const container = document.getElementById('statusContainer');
+      const messageEl = document.getElementById('statusMessage');
+
+      container.className = 'status-container visible error';
+      messageEl.innerHTML = message;
+    }
+
+    function disableButton(disabled) {
+      document.getElementById('generateBtn').disabled = disabled;
+    }
+  </script>
+</body>
+</html>
