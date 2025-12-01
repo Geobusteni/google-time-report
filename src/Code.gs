@@ -147,190 +147,229 @@ function generateReportFromSidebar(year, month) {
 // ============================================================================
 
 /**
- * Sets up a monthly trigger to run on the 1st of each month at 00:05.
- * @returns {Object} Result object with success status and message
- */
-function setupMonthlyTrigger() {
-  try {
-    // Remove existing monthly triggers first
-    removeTriggersForFunction('generateMonthlyReportTrigger');
-
-    // Create new monthly trigger
-    ScriptApp.newTrigger('generateMonthlyReportTrigger')
-      .timeBased()
-      .onMonthDay(1)
-      .atHour(0)
-      .nearMinute(5)
-      .create();
-
-    const message = 'Monthly trigger created. Report will generate on the 1st of each month at 00:05.';
-    Logger.log(message);
-
-    SpreadsheetApp.getUi().alert('Success', message, SpreadsheetApp.getUi().ButtonSet.OK);
-
-    return { success: true, message: message };
-  } catch (error) {
-    const message = 'Failed to create trigger: ' + error.message;
-    Logger.log(message);
-    SpreadsheetApp.getUi().alert('Error', message, SpreadsheetApp.getUi().ButtonSet.OK);
-    return { success: false, message: message };
-  }
-}
-
-/**
- * Sets up a daily trigger (menu handler).
+ * Sets up a daily trigger (menu handler with dialog).
  */
 function setupDailyTriggerMenu() {
-  const result = setupDailyTrigger(6);
-  SpreadsheetApp.getUi().alert(
-    result.success ? 'Success' : 'Error',
-    result.message,
-    SpreadsheetApp.getUi().ButtonSet.OK
+  const ui = SpreadsheetApp.getUi();
+  const response = ui.prompt(
+    'Setup Daily Trigger',
+    'Enter hour to run (0-23):',
+    ui.ButtonSet.OK_CANCEL
   );
-}
 
-/**
- * Sets up a daily trigger at a specified hour.
- * @param {number} hour - The hour to run (0-23)
- * @returns {Object} Result object with success status and message
- */
-function setupDailyTrigger(hour = 6) {
+  if (response.getSelectedButton() !== ui.Button.OK) return;
+
+  const hour = parseInt(response.getResponseText()) || 6;
+  if (hour < 0 || hour > 23) {
+    ui.alert('Error', 'Hour must be between 0 and 23.', ui.ButtonSet.OK);
+    return;
+  }
+
   try {
-    removeTriggersForFunction('generateMonthlyReportTrigger');
-
-    ScriptApp.newTrigger('generateMonthlyReportTrigger')
+    ScriptApp.newTrigger('triggerDailyReport')
       .timeBased()
       .everyDays(1)
       .atHour(hour)
       .create();
 
-    return {
-      success: true,
-      message: `Daily trigger created. Report will generate every day at ${hour}:00.`
-    };
+    ui.alert('Success', `Daily trigger created. Report will generate every day at ${hour}:00.`, ui.ButtonSet.OK);
   } catch (error) {
-    return {
-      success: false,
-      message: 'Failed to create daily trigger: ' + error.message
-    };
+    ui.alert('Error', 'Failed to create trigger: ' + error.message, ui.ButtonSet.OK);
   }
 }
 
 /**
- * Sets up a weekly trigger (menu handler).
+ * Sets up a weekly trigger (menu handler with dialog).
  */
 function setupWeeklyTriggerMenu() {
-  const result = setupWeeklyTrigger('MONDAY', 6);
-  SpreadsheetApp.getUi().alert(
-    result.success ? 'Success' : 'Error',
-    result.message,
-    SpreadsheetApp.getUi().ButtonSet.OK
+  const ui = SpreadsheetApp.getUi();
+
+  const dayResponse = ui.prompt(
+    'Setup Weekly Trigger',
+    'Enter day of week (1=Monday, 2=Tuesday, ... 7=Sunday):',
+    ui.ButtonSet.OK_CANCEL
   );
-}
 
-/**
- * Sets up a weekly trigger on a specified day.
- * @param {string} dayOfWeek - The day of week (MONDAY, TUESDAY, etc.)
- * @param {number} hour - The hour to run (0-23)
- * @returns {Object} Result object with success status and message
- */
-function setupWeeklyTrigger(dayOfWeek = 'MONDAY', hour = 6) {
+  if (dayResponse.getSelectedButton() !== ui.Button.OK) return;
+
+  const dayNum = parseInt(dayResponse.getResponseText());
+  if (dayNum < 1 || dayNum > 7) {
+    ui.alert('Error', 'Day must be between 1 (Monday) and 7 (Sunday).', ui.ButtonSet.OK);
+    return;
+  }
+
+  const hourResponse = ui.prompt(
+    'Setup Weekly Trigger',
+    'Enter hour to run (0-23):',
+    ui.ButtonSet.OK_CANCEL
+  );
+
+  if (hourResponse.getSelectedButton() !== ui.Button.OK) return;
+
+  const hour = parseInt(hourResponse.getResponseText()) || 6;
+  if (hour < 0 || hour > 23) {
+    ui.alert('Error', 'Hour must be between 0 and 23.', ui.ButtonSet.OK);
+    return;
+  }
+
+  const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+  const dayName = days[dayNum - 1];
+
   try {
-    removeTriggersForFunction('generateMonthlyReportTrigger');
-
-    const weekDay = ScriptApp.WeekDay[dayOfWeek];
-
-    ScriptApp.newTrigger('generateMonthlyReportTrigger')
+    ScriptApp.newTrigger('triggerWeeklyReport')
       .timeBased()
-      .onWeekDay(weekDay)
+      .onWeekDay(ScriptApp.WeekDay[dayName])
       .atHour(hour)
       .create();
 
-    return {
-      success: true,
-      message: `Weekly trigger created. Report will generate every ${dayOfWeek} at ${hour}:00.`
-    };
+    ui.alert('Success', `Weekly trigger created. Report will generate every ${dayName} at ${hour}:00.`, ui.ButtonSet.OK);
   } catch (error) {
-    return {
-      success: false,
-      message: 'Failed to create weekly trigger: ' + error.message
-    };
+    ui.alert('Error', 'Failed to create trigger: ' + error.message, ui.ButtonSet.OK);
   }
 }
 
 /**
- * Removes all project triggers (menu handler).
+ * Sets up a monthly trigger (menu handler with dialog).
+ */
+function setupMonthlyTrigger() {
+  const ui = SpreadsheetApp.getUi();
+
+  const dayResponse = ui.prompt(
+    'Setup Monthly Trigger',
+    'Enter day of month to run (1-28):',
+    ui.ButtonSet.OK_CANCEL
+  );
+
+  if (dayResponse.getSelectedButton() !== ui.Button.OK) return;
+
+  const dayOfMonth = parseInt(dayResponse.getResponseText()) || 1;
+  if (dayOfMonth < 1 || dayOfMonth > 28) {
+    ui.alert('Error', 'Day must be between 1 and 28 (to work for all months).', ui.ButtonSet.OK);
+    return;
+  }
+
+  const hourResponse = ui.prompt(
+    'Setup Monthly Trigger',
+    'Enter hour to run (0-23):',
+    ui.ButtonSet.OK_CANCEL
+  );
+
+  if (hourResponse.getSelectedButton() !== ui.Button.OK) return;
+
+  const hour = parseInt(hourResponse.getResponseText()) || 0;
+  if (hour < 0 || hour > 23) {
+    ui.alert('Error', 'Hour must be between 0 and 23.', ui.ButtonSet.OK);
+    return;
+  }
+
+  try {
+    ScriptApp.newTrigger('triggerMonthlyReport')
+      .timeBased()
+      .onMonthDay(dayOfMonth)
+      .atHour(hour)
+      .create();
+
+    ui.alert('Success', `Monthly trigger created. Report will generate on day ${dayOfMonth} of each month at ${hour}:00.`, ui.ButtonSet.OK);
+  } catch (error) {
+    ui.alert('Error', 'Failed to create trigger: ' + error.message, ui.ButtonSet.OK);
+  }
+}
+
+/**
+ * Shows current triggers and allows removal.
  */
 function removeAllTriggersMenu() {
-  const result = removeAllTriggers();
-  SpreadsheetApp.getUi().alert(
-    result.success ? 'Success' : 'Error',
-    result.message,
-    SpreadsheetApp.getUi().ButtonSet.OK
-  );
-}
+  const ui = SpreadsheetApp.getUi();
+  const triggers = ScriptApp.getProjectTriggers();
 
-/**
- * Removes all project triggers.
- * @returns {Object} Result object with success status and message
- */
-function removeAllTriggers() {
-  try {
-    const triggers = ScriptApp.getProjectTriggers();
-    let count = 0;
+  if (triggers.length === 0) {
+    ui.alert('Info', 'No triggers are currently set up.', ui.ButtonSet.OK);
+    return;
+  }
 
-    triggers.forEach(trigger => {
-      ScriptApp.deleteTrigger(trigger);
-      count++;
-    });
+  // Build list of triggers
+  let triggerList = 'Current triggers:\n\n';
+  triggers.forEach((trigger, i) => {
+    const handler = trigger.getHandlerFunction();
+    triggerList += `${i + 1}. ${handler}\n`;
+  });
+  triggerList += '\nDo you want to remove ALL triggers?';
 
-    return {
-      success: true,
-      message: `Removed ${count} trigger(s).`
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: 'Failed to remove triggers: ' + error.message
-    };
+  const response = ui.alert('Remove Triggers', triggerList, ui.ButtonSet.YES_NO);
+
+  if (response === ui.Button.YES) {
+    triggers.forEach(trigger => ScriptApp.deleteTrigger(trigger));
+    ui.alert('Success', `Removed ${triggers.length} trigger(s).`, ui.ButtonSet.OK);
   }
 }
 
 /**
- * Removes triggers for a specific function.
- * @param {string} functionName - The function name to remove triggers for
+ * Handler for daily trigger - generates report for previous day.
  */
-function removeTriggersForFunction(functionName) {
-  const triggers = ScriptApp.getProjectTriggers();
-  triggers.forEach(trigger => {
-    if (trigger.getHandlerFunction() === functionName) {
-      ScriptApp.deleteTrigger(trigger);
-    }
-  });
+function triggerDailyReport() {
+  try {
+    const now = new Date();
+    const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const startDateStr = formatDateForInput(yesterday);
+    const endDateStr = formatDateForInput(todayStart);
+
+    // Get all owned calendars
+    const calendars = CalendarApp.getAllOwnedCalendars();
+    const calendarIds = calendars.map(c => c.getId());
+
+    generateReportForDateRange(startDateStr, endDateStr, calendarIds);
+    Logger.log('Daily report generated successfully');
+  } catch (error) {
+    Logger.log('Daily report failed: ' + error.message);
+    console.error(error);
+  }
 }
 
 /**
- * Handler function for scheduled triggers.
- * Generates report for the previous month when run on the 1st,
- * otherwise generates for the current month.
+ * Handler for weekly trigger - generates report for previous week.
  */
-function generateMonthlyReportTrigger() {
+function triggerWeeklyReport() {
   try {
     const now = new Date();
-    const isFirstOfMonth = now.getDate() === 1;
+    const weekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
 
-    // If running on the 1st, generate report for previous month
-    // Otherwise, generate for current month
-    if (isFirstOfMonth) {
-      const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      generateReportForMonth(prevMonth.getFullYear(), prevMonth.getMonth());
-    } else {
-      generateCurrentMonthReport();
-    }
+    const startDateStr = formatDateForInput(weekAgo);
+    const endDateStr = formatDateForInput(now);
 
-    Logger.log('Scheduled report generation completed successfully');
+    // Get all owned calendars
+    const calendars = CalendarApp.getAllOwnedCalendars();
+    const calendarIds = calendars.map(c => c.getId());
+
+    generateReportForDateRange(startDateStr, endDateStr, calendarIds);
+    Logger.log('Weekly report generated successfully');
   } catch (error) {
-    Logger.log('Scheduled report generation failed: ' + error.message);
+    Logger.log('Weekly report failed: ' + error.message);
+    console.error(error);
+  }
+}
+
+/**
+ * Handler for monthly trigger - generates report for previous month.
+ */
+function triggerMonthlyReport() {
+  try {
+    const now = new Date();
+    const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+
+    const startDateStr = formatDateForInput(prevMonthStart);
+    const endDateStr = formatDateForInput(prevMonthEnd);
+
+    // Get all owned calendars
+    const calendars = CalendarApp.getAllOwnedCalendars();
+    const calendarIds = calendars.map(c => c.getId());
+
+    generateReportForDateRange(startDateStr, endDateStr, calendarIds);
+    Logger.log('Monthly report generated successfully');
+  } catch (error) {
+    Logger.log('Monthly report failed: ' + error.message);
     console.error(error);
   }
 }
