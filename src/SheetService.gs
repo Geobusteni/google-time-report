@@ -209,27 +209,20 @@ function formatTotalsSheet(sheet, rowCount) {
 }
 
 /**
- * Deletes the default "Sheet1" if it exists and is empty.
+ * Deletes the default "Sheet1" and sets Report as active sheet.
  * @param {GoogleAppsScript.Spreadsheet.Spreadsheet} spreadsheet - The spreadsheet
  */
 function deleteDefaultSheetIfEmpty(spreadsheet) {
+  // Set Report sheet as active (so it shows first when opened)
+  const reportSheet = spreadsheet.getSheetByName(REPORT_SHEET_NAME);
+  if (reportSheet) {
+    spreadsheet.setActiveSheet(reportSheet);
+  }
+
+  // Delete Sheet1 if it exists
   const defaultSheet = spreadsheet.getSheetByName('Sheet1');
-
-  if (defaultSheet) {
-    // Check if sheet is empty (only has default 1 row and 1 column with no data)
-    const dataRange = defaultSheet.getDataRange();
-    const values = dataRange.getValues();
-
-    const isEmpty = values.length === 1 &&
-                    values[0].length === 1 &&
-                    values[0][0] === '';
-
-    if (isEmpty) {
-      // Make sure we have other sheets before deleting
-      if (spreadsheet.getSheets().length > 1) {
-        spreadsheet.deleteSheet(defaultSheet);
-        Logger.log('Deleted empty default Sheet1');
-      }
-    }
+  if (defaultSheet && spreadsheet.getSheets().length > 1) {
+    spreadsheet.deleteSheet(defaultSheet);
+    Logger.log('Deleted default Sheet1');
   }
 }
